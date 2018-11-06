@@ -1,2 +1,0 @@
-SciKit Rozdzielanie video na klatki i wybieranie co 10
-Org Suf Sif i Kaskader Haara
