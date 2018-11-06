@@ -4,114 +4,72 @@ from pylab import *
 import skimage as ski
 # from skimage import feature
 from skimage import data, io, filters, exposure, measure, morphology, transform
-# from skimage.filters import rank
-# from skimage import util
-# from skimage.color import rgb2hsv, hsv2rgb, rgb2gray
-# from skimage.filters.edges import convolve
+from skimage.color import rgb2hsv, hsv2rgb, rgb2gray
 from matplotlib import pylab as plt
 import numpy as np
+from skimage.filters.edges import convolve
+import cv2
+import numpy as np
+
+lineLength = 370
 
 def main():
-    images =  data.imread()
-    , grayImages = imageRead(18)  # pobranie obrazów
+    img, gray =  GetImage()
 
-    createPlot(images, grayImages)  # utworzenie wykresu
+    GetLines(img)
+    plt.show()
+    #createPlot(img, gray)  # utworzenie wykresu
 
-def imageRead(howMany):
-    images = []  # tablica obrazów
-    grayImages = []  # tablica obrazów w odcieniach szarości
-    for i in range(howMany):
-        if i <= 9:
-            img = io.imread('http://www.cs.put.poznan.pl/wjaskowski/pub/teaching/kck/labs/planes/samolot0%d.jpg' % i, as_gray=False)
-            imgGray = io.imread('http://www.cs.put.poznan.pl/wjaskowski/pub/teaching/kck/labs/planes/samolot0%d.jpg' % i, as_gray=True)
-            images.append(img)
-            grayImages.append(imgGray)
-        else:
-            img = io.imread('http://www.cs.put.poznan.pl/wjaskowski/pub/teaching/kck/labs/planes/samolot%d.jpg' % i, as_gray=False)
-            imgGray = io.imread('http://www.cs.put.poznan.pl/wjaskowski/pub/teaching/kck/labs/planes/samolot%d.jpg' % i, as_gray=True)
-            images.append(img)
-            grayImages.append(imgGray)
 
-    return images, grayImages
+def GetLines(img):
+    # Convert the img to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Apply edge detection method on the image
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    # This returns an array of r and theta values
+    lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
+    for i in range(len(lines)):
+        # The below for loop runs till r and theta values
+        # are in the range of the 2d array
+        for r, theta in lines[i]:
+            # Stores the value of cos(theta) in a
+            a = np.cos(theta)
 
-def createPlot(images, grayImages):
-    # ustawienia wykresu
-    fig = figure(figsize=(20, 20))
-    subplots_adjust(wspace=0, hspace=0)
+            # Stores the value of sin(theta) in b
+            b = np.sin(theta)
 
-    # byłem zmuszony przeskalować wszystkie obrazki do jednego wymiaru, ponieważ w przeciwnym przypadku zawsze któryś
-    # się nie wyświetlał (zazwyczaj środkowy na dole) i do tego posłużą poniższe zmienne
-    height, width = 0, 0
+            # x0 stores the value rcos(theta)
+            x0 = a * r
 
-    for i in range(len(images)):
-        # pobranie obrazków z tablic
-        image = grayImages[i]
-        originalImage = images[i]
+            # y0 stores the value rsin(theta)
+            y0 = b * r
 
-        #pobranie wymairów obrazka
-        h, w = np.shape(image)
+            # x1 stores the rounded off value of (rcos(theta)-1000sin(theta))
+            x1 = int(x0 + 1000 * (-b))
 
-        # przypisanie wymiarów na podstawie pierwszego obrazka
-        if i == 0:
-            height = h
-            width = w
+            # y1 stores the rounded off value of (rsin(theta)+1000cos(theta))
+            y1 = int(y0 + 1000 * (a))
 
-        # średnia z wartości macierzy
-        average = np.mean(image) * 0.666667
+            # x2 stores the rounded off value of (rcos(theta)+1000sin(theta))
+            x2 = int(x0 - 1000 * (-b))
 
-        # przypisanie wartości 0 i 1 poszczególnym pikselom w celu późniejszego znalezienia konturów
-        for x in range(h):
-            for y in range(w):
-                pixcel = originalImage[x][y]
-                if pixcel[0] >= 32 and pixcel[1] >= 72 and pixcel[2] >= 112:
-                    image[x][y] = 1
-                if image[x][y] > average:
-                    image[x][y] = 0
-                else:
-                    image[x][y] = 1
+            # y2 stores the rounded off value of (rsin(theta)-1000cos(theta))
+            y2 = int(y0 - 1000 * (a))
 
-        # utworzenie wykresów i usunięcie osi
-        ax = fig.add_subplot(len(images) / 3, 3, i + 1)
-        ax.yaxis.set_visible(False)
-        ax.xaxis.set_visible(False)
+            # cv2.line draws a line in img from the point(x1,y1) to (x2,y2).
+            # (0,0,255) denotes the colour of the line to be
+            # drawn. In this case, it is red.
+            cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    # All the changes made in the input image are finally
+    # written on a new image houghlines.jpg
+    cv2.imwrite('linesDetected.jpg', img)
 
-        # usuwanie szumu na obrazkach
-        image = morphology.closing(image, morphology.disk(15))
-        image = morphology.dilation(image, morphology.disk(6))
 
-        # zmiana wymiarów obrazka
-        image = transform.resize(image, (height, width))
-        originalImage = transform.resize(originalImage, (height, width))
+def GetImage():
+    img = cv2.imread('./Notes/notes1.jpg')
+    gray = rgb2gray(img)
+    return img, gray
 
-        # znalezienie krawędzi
-        edges = measure.find_contours(image, 0)
-
-        # wyrysowanie krawędzi i ustalenie, które będa się wyświetlać
-        outputEdges = []
-        for edge in edges:
-            if len(edge) > 370:
-                outputEdges.append(edge)
-        for edge in outputEdges:
-            ax.plot(edge[:, 1], edge[:, 0], linewidth=1.5)
-
-        # znalezienie środków
-        centers = []
-        for edge in outputEdges:
-            sumX, sumY, numPoint = 0, 0, 0
-            for point in edge:
-                sumX = sumX + point[1]
-                sumY = sumY + point[0]
-                numPoint = numPoint + 1
-            centers.append([(sumX / numPoint), (sumY / numPoint)])
-        for center in centers:
-            ax.add_artist(plt.Circle(center, 11, color='white'))
-
-        # wyświetlenie obrazka
-        io.imshow(originalImage)
-
-    plt.tight_layout()  # dla bardziej zbitego wykresu
-    fig.savefig("127329_Obrazy_I.pdf")  # zapisanie w pliku (można zakomentować i odkomentować linię niżej dla zwyczajnego wyświetlenia)
-    # plt.show()  # jakby się chciało wyświetlać poza wysyłaniem do pliku to trzeba odkomentować
 
 if __name__ == '__main__':
     main();
