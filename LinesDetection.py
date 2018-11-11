@@ -5,26 +5,28 @@ import cv2
 import numpy as np
 import math
 
+
 def GetGrouped5Lines(img):
     lines, alfa, areLinesOnImage = GetLines(img)
-    #DrawAllLines(img, lines)
+    # DrawAllLines(img, lines)
     linesYPositions, distanceBetweenLines = GetLinesYPositions(lines)
     return Group5Lines(linesYPositions, distanceBetweenLines), distanceBetweenLines
 
-#Returns list of Y Positions of horizontal lines
-#Returns dominant as most common distance between lines in pixels
+
+# Returns list of Y Positions of horizontal lines
+# Returns dominant as most common distance between lines in pixels
 def GetLinesYPositions(lines):
     linesYPosition = []
 
-    #Get Y Position Value from line
+    # Get Y Position Value from line
     for i in range(len(lines)):
         linesYPosition.append(lines[i][1])
     linesYPosition.sort()
     i = 0
 
-    #delete intermediate lines if they are too close
-    while (i < len(linesYPosition) - 1):
-        if (linesYPosition[i + 1] - linesYPosition[i] < minimumDistanceBetweenLines):
+    # delete intermediate lines if they are too close
+    while i < len(linesYPosition) - 1:
+        if linesYPosition[i + 1] - linesYPosition[i] < minimumDistanceBetweenLines:
             avg = (linesYPosition[i] + linesYPosition[i + 1]) / 2
             linesYPosition.remove(linesYPosition[i + 1])
             linesYPosition.insert(i, avg)
@@ -37,6 +39,7 @@ def GetLinesYPositions(lines):
 
     dominant = max(set(distances), key=distances.count)
     return linesYPosition, dominant
+
 
 def Group5Lines(listOfLines, distanceBetweenLines):
     result =[]
@@ -64,6 +67,7 @@ def GetRotatedImage():
         return t, True
     return img, False
 
+
 def DrawAllLines(img, lines):
 
     for i in range(len(lines)):
@@ -73,6 +77,7 @@ def DrawAllLines(img, lines):
     # All the changes made in the input image are finally
     # written on a new image houghlines.jpg
     cv2.imwrite('linesDetected.jpg', img)
+
 
 def DrawLines(img, groupedLinesYPositions):
 
@@ -85,11 +90,12 @@ def DrawLines(img, groupedLinesYPositions):
     # written on a new image houghlines.jpg
     cv2.imwrite('linesDetected.jpg', img)
 
+
 def GetLines(img):
 
     result = []
     alfas = []
-    #from https://www.geeksforgeeks.org/line-detection-python-opencv-houghline-method/
+    # from https://www.geeksforgeeks.org/line-detection-python-opencv-houghline-method/
 
     # Convert the img to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -131,6 +137,6 @@ def GetLines(img):
                 result.append([x1,y1,x2,y2])
                 alfas.append(theta)
         alfas.sort()
-        alfa = alfas[int(len(alfas)/2)] #median from angle between horizontal line and image lines
+        alfa = alfas[int(len(alfas)/2)]  #median from angle between horizontal line and image lines
         return result, alfa, True
     return None, None, False

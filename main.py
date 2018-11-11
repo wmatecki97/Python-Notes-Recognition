@@ -19,7 +19,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX  # wybór czcionki - musi być z tych FONT_HERSH
 
 # Dodawanie czcionki: https://www.youtube.com/watch?v=U6uIrq2eh_o
 def main():
-    # GetCircles()  # to trzeba odkomentować do szukania owali
+    # GetCircles()  # to trzeba odkomentować do szukania owali, ale wtedy trzeba resztę maina zakomentować...
 
     img, areLinesOnImage = GetRotatedImage()
 
