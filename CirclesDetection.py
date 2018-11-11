@@ -7,6 +7,9 @@ import cv2
 import matplotlib.pyplot as plt
 
 # kod wzięty ze strony http://scikit-image.org/docs/dev/auto_examples/edges/plot_circular_elliptical_hough_transform.html
+# odkryłem już problem. Znajduje dużo więcej elips łącząc jakieś punkty przez to na każdą nutę jest ponad 100 elips i to własnie trzeba będzie jakoś optymalizować, ale póki co nie mam pomysłu jak.
+# dopiero po optymalizacji można znaleźć środki, ale to powinno być dużo łatwiejsze
+# oczywiście, trzeba jeszcze zrobić odpowiedni return tej funkcji i zmienne wejściowe, ale to póki co jest wersja robocza
 def GetCircles():
     image, gray = GetImage()
     image_rgb = image[0:220, 0:420]
@@ -23,7 +26,7 @@ def GetCircles():
 
     # Estimated parameters for the ellipse
     best = list(result[-1])
-    print(len(result))  # tutaj printuje ile znajduje elips, dzięki czemu widać czemu to tak długo zajmuje
+    print(len(result))  # tutaj printuje ile znajduje elips
     yc, xc, a, b = [int(round(x)) for x in best[1:5]]
     orientation = best[5]
 
