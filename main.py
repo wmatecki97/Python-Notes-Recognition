@@ -21,20 +21,21 @@ def main():
     tone = 'Tutaj pojawi się nazwa dźwięku, który ma środek na wysokości 349px'
     if(areLinesOnImage):
         lines, distanceBetweenLines = GetGrouped5Lines(img)
-        DrawLines(img, lines)
+        #DrawLines(img, lines)
         notes = GetCircles(img, distanceBetweenLines)
         for note in notes:
             tone = GetTone(lines,distanceBetweenLines,note[1])
-            cv2.putText(img, tone, (int(note[0]), int(note[1])), font, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
+            cv2.putText(img, tone, (int(note[0] + distanceBetweenLines), int(note[1])), font, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
 
 
     # zamiast (0, 130), wystarczy wprowadzić odpowiednie współrzędne i tam się tekst wyświetli)
     io.imshow(img)
+    cv2.imwrite('notesDescribed.jpg', img)
     axis('off')
     plt.show()
 
 def GetImage():
-    img = cv2.imread('./Notes/notes02.jpg')
+    img = cv2.imread('./Notes/notes03.jpg')
     gray = rgb2gray(img)
     return img, gray
 
