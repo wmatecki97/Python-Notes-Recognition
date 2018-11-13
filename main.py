@@ -12,13 +12,15 @@ import numpy as np
 lineLength = 400
 minimumDistanceBetweenLines = 4
 font = cv2.FONT_HERSHEY_SIMPLEX  # wybór czcionki - musi być z tych FONT_HERSHEY bo inaczej się sypie np. dla Ariala
+storeImage = True
+
 
 # Dodawanie czcionki: https://www.youtube.com/watch?v=U6uIrq2eh_o
 def main():
 
     img, areLinesOnImage = GetRotatedImage()
 
-    tone = 'Tutaj pojawi się nazwa dźwięku, który ma środek na wysokości 349px'
+
     if(areLinesOnImage):
         lines, distanceBetweenLines = GetGrouped5Lines(img)
         #DrawLines(img, lines)
@@ -26,11 +28,13 @@ def main():
         for note in notes:
             tone = GetTone(lines,distanceBetweenLines,note[1])
             cv2.putText(img, tone, (int(note[0] + distanceBetweenLines), int(note[1])), font, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
+    else:
+        cv2.putText(img, 'NIE ZNALAZŁEM NUT', (0,0), font, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
 
 
-    # zamiast (0, 130), wystarczy wprowadzić odpowiednie współrzędne i tam się tekst wyświetli)
     io.imshow(img)
-    cv2.imwrite('notesDescribed.jpg', img)
+    if(storeImage):
+        cv2.imwrite('notesDescribed.jpg', img)
     axis('off')
     plt.show()
 
