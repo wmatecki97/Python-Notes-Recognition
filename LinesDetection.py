@@ -8,10 +8,14 @@ import math
 
 def GetGrouped5Lines(img):
     lines, alfa, areLinesOnImage = GetLines(img)
-    # DrawAllLines(img, lines)
-    linesYPositions, distanceBetweenLines = GetLinesYPositions(lines)
-    return Group5Lines(linesYPositions, distanceBetweenLines), distanceBetweenLines
+    if(lines is not None):
+        # DrawAllLines(img, lines)
 
+        linesYPositions, distanceBetweenLines = GetLinesYPositions(lines)
+        if(len(linesYPositions)>4):
+            return Group5Lines(linesYPositions, distanceBetweenLines), distanceBetweenLines
+
+    return None, None
 
 # Returns list of Y Positions of horizontal lines
 # Returns dominant as most common distance between lines in pixels
@@ -34,11 +38,13 @@ def GetLinesYPositions(lines):
         i = i + 1
     distances = []
 
-    for i in range(len(linesYPosition) - 1):
-        distances.append(abs(linesYPosition[i] - linesYPosition[i + 1]))
+    if(len(linesYPosition) > 4):
+        for i in range(len(linesYPosition) - 1):
+            distances.append(abs(linesYPosition[i] - linesYPosition[i + 1]))
 
-    dominant = max(set(distances), key=distances.count)
-    return linesYPosition, linesYPosition[1]-linesYPosition[0]
+        dominant = max(set(distances), key=distances.count)
+        return linesYPosition, linesYPosition[1]-linesYPosition[0]
+    return [],[]
 
 
 def Group5Lines(listOfLines, distanceBetweenLines):
@@ -55,8 +61,8 @@ def Group5Lines(listOfLines, distanceBetweenLines):
     return result
 
 
-def GetRotatedImage():
-    img, gray =  GetImage()
+def GetRotatedImage(img, gray):
+    #img, gray =  GetImage()
     lines, alfa, areLinesOnImage = GetLines(img)
     if(areLinesOnImage):
         alfa = math.degrees(alfa) -90
