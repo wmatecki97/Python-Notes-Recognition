@@ -9,41 +9,57 @@ from skimage import io
 import numpy as np
 
 #PARAMETERS
-lineLength = 200
-minimumDistanceBetweenLines = 4
+lineLength = 250
+minimumDistanceBetweenLines = 5
 font = cv2.FONT_HERSHEY_SIMPLEX  # wybór czcionki - musi być z tych FONT_HERSHEY bo inaczej się sypie np. dla Ariala
 storeImage = True
 useCamera = False
-imagePath = './Notes/notes03.jpg'
+processVideo = False
+imagePath = './Notes/notes05.jpg'
+videoPath = './Notes/video02.mp4'
+drawLines = True
+drawAllLines = False
 
 # Dodawanie czcionki: https://www.youtube.com/watch?v=U6uIrq2eh_o
 def main():
-    cap = cv2.VideoCapture(0)
+    if(processVideo):
+        cap = cv2.VideoCapture(videoPath)
+    else:
+        cap = cv2.VideoCapture(0)
 
-    if(useCamera):
+
+    if(useCamera or processVideo):
         while True:
             # Capture frame-by-frame
             ret, frame = cap.read()
 
+            if (storeImage):
+                cv2.imwrite('Czysty.jpg', frame)
             # Our operations on the frame come here
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            processImage(frame, gray)
+            processImage(frame, gray, drawLines, drawAllLines)
 
+            if (storeImage):
+                cv2.imwrite('ZNutkami.jpg', frame)
             if cv2.waitKey(500) & 0xFF == ord('q'):
                 return
     else:
         img, gray = GetImage()
-        processImage(img, gray)
+        if (storeImage):
+                cv2.imwrite('Czysty.jpg', img)
+        processImage(img, gray, drawLines, drawAllLines, storeImage)
+
         cv2.waitKey(50000)
 
 
-def processImage(frame, gray):
+def processImage(frame, gray, drawLines, drawAllLines, storeImage):
     img, areLinesOnImage = GetRotatedImage(frame, gray)
-    lines, distanceBetweenLines = GetGrouped5Lines(img)
+    lines, distanceBetweenLines = GetGrouped5Lines(img, drawAllLines)
 
     if (lines is not None):
-        # DrawLines(img, lines)
+        if(drawLines):
+            DrawLines(img, lines)
         notes = GetCircles(img, distanceBetweenLines)
         for note in notes:
             tone = GetTone(lines, distanceBetweenLines, note[1])
@@ -54,7 +70,9 @@ def processImage(frame, gray):
 
     cv2.imshow('frame',img)
     if (storeImage):
-        cv2.imwrite('notesDescribed.jpg', img)
+                cv2.imwrite('ZNutkami.jpg', img)
+    # plt.imshow(img)
+    # plt.show()
 
 
 def GetImage():

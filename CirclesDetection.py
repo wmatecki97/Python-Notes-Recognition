@@ -18,16 +18,17 @@ def GetCircles(image_rgb, maxNoteHeight):
 
     edges = morphology.dilation(edges)
     edges = morphology.closing(edges)
-    plt.imshow(image_rgb)
+    #plt.imshow(image_rgb)
     contours = measure.find_contours(edges,0)
 
-    # plt.imshow(contours)
+    #plt.imshow(contours)
     circles=[]
     for n, contour in enumerate(contours):
         area = getArea(contour)
-        if(area < maxNoteHeight**2*2.5 and area > maxNoteHeight**2*0.6):
-            #plt.plot(contour[:, 1], contour[:, 0], linewidth=2)
+        plt.plot(contour[:, 1], contour[:, 0], linewidth=2)
+        if(area < maxNoteHeight**2*4 and area > maxNoteHeight**2*0.001):
             circles.append(contour)
+
     centers =[]
     for circle in circles:
         sumX, sumY, numPoint = 0,0,0

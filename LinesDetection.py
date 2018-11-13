@@ -6,10 +6,11 @@ import numpy as np
 import math
 
 
-def GetGrouped5Lines(img):
+def GetGrouped5Lines(img, drawAllLines):
     lines, alfa, areLinesOnImage = GetLines(img)
     if(lines is not None):
-        # DrawAllLines(img, lines)
+        if(drawAllLines):
+            DrawAllLines(img, lines)
 
         linesYPositions, distanceBetweenLines = GetLinesYPositions(lines)
         if(len(linesYPositions)>4):
