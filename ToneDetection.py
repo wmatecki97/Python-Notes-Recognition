@@ -2,7 +2,7 @@
 def GetTone(lines, distanceBetweenLines, yNotePosition):
     for i in range(len(lines)):
        #Jeżeli nuta jest w zasięgu tej pięciolinii
-       if((yNotePosition > lines[i][0] - 2 * distanceBetweenLines) or (yNotePosition < lines[4] + 2.5 * distanceBetweenLines)):
+       if((yNotePosition > lines[i][0] - 2 * distanceBetweenLines) or (yNotePosition < lines[i][0] + 2.5 * distanceBetweenLines)):
             margin = distanceBetweenLines/4
 
             if(yNotePosition < lines[i][0] - 2*distanceBetweenLines + margin):
@@ -47,3 +47,5 @@ def GetTone(lines, distanceBetweenLines, yNotePosition):
                 return 'h'
             elif(yNotePosition < lines[i][4] + 2*distanceBetweenLines + margin):
                 return 'a'
+
+    return ''

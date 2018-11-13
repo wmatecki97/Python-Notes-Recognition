@@ -1,40 +1,49 @@
 from main import *
-from skimage import data, color, img_as_ubyte
+from skimage import data, color, morphology, img_as_ubyte, measure
 from skimage.feature import canny
-from skimage.transform import hough_ellipse
+from skimage.transform import hough_ellipse, hough_circle
 from skimage.draw import ellipse_perimeter
 import cv2
 import matplotlib.pyplot as plt
+import numpy as np
+from skimage.color import rgb2gray
 
-# kod wzięty ze strony http://scikit-image.org/docs/dev/auto_examples/edges/plot_circular_elliptical_hough_transform.html
-# odkryłem już problem. Znajduje dużo więcej elips łącząc jakieś punkty przez to na każdą nutę jest ponad 100 elips i to własnie trzeba będzie jakoś optymalizować, ale póki co nie mam pomysłu jak.
-# dopiero po optymalizacji można znaleźć środki, ale to powinno być dużo łatwiejsze
-# oczywiście, trzeba jeszcze zrobić odpowiedni return tej funkcji i zmienne wejściowe, ale to póki co jest wersja robocza
-def GetCircles():
-    image, gray = GetImage()
-    image_rgb = image[0:220, 0:420]
-    image_gray = color.rgb2gray(image_rgb)
+
+def GetCircles(image_rgb, maxNoteHeight):
+    # image_rgb = image[0:220, 0:420]
+    image_gray = rgb2gray(image_rgb)
+
     edges = canny(image_gray, sigma=2.0,
                   low_threshold=0.55, high_threshold=0.8)
 
-    # Perform a Hough Transform
-    # The accuracy corresponds to the bin size of a major axis.
-    # The value is chosen in order to get a single high accumulator.
-    # The threshold eliminates low accumulators
-    result = hough_ellipse(edges)
-    result.sort(order='accumulator')
-
-    # Estimated parameters for the ellipse
-    best = list(result[-1])
-    print(len(result))  # tutaj printuje ile znajduje elips
-    yc, xc, a, b = [int(round(x)) for x in best[1:5]]
-    orientation = best[5]
-
-    # Draw the ellipse on the original image
-    cy, cx = ellipse_perimeter(yc, xc, a, b, orientation)
-    image_rgb[cy, cx] = (0, 0, 255)
-
-    plt.plot(figsize=(4, 4))
+    edges = morphology.dilation(edges)
+    edges = morphology.closing(edges)
     plt.imshow(image_rgb)
+    contours = measure.find_contours(edges,0)
+
+    # plt.imshow(contours)
+    circles=[]
+    for n, contour in enumerate(contours):
+        area = getArea(contour)
+        if(area < maxNoteHeight**2*1.5 and area > maxNoteHeight**2*0.6):
+            plt.plot(contour[:, 1], contour[:, 0], linewidth=2)
+            circles.append(contour)
+    centers =[]
+    for circle in circles:
+        sumX, sumY, numPoint = 0,0,0
+        for point in circle:
+            sumX = sumX + point[1]
+            sumY = sumY + point[0]
+            numPoint = numPoint+1
+        centers.append([sumX/numPoint, sumY/numPoint])
 
     plt.show()
+    return centers
+
+def getArea(contour):
+    columns = 0;
+    for row in contour:
+        if (len(row) > columns):
+            columns = len(row)
+    area = columns * len(contour)
+    return area

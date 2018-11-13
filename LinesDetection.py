@@ -38,7 +38,7 @@ def GetLinesYPositions(lines):
         distances.append(abs(linesYPosition[i] - linesYPosition[i + 1]))
 
     dominant = max(set(distances), key=distances.count)
-    return linesYPosition, dominant
+    return linesYPosition, linesYPosition[1]-linesYPosition[0]
 
 
 def Group5Lines(listOfLines, distanceBetweenLines):
