@@ -31,7 +31,8 @@ def GetLinesYPositions(lines):
 
     # delete intermediate lines if they are too close
     while i < len(linesYPosition) - 1:
-        if linesYPosition[i + 1] - linesYPosition[i] < minimumDistanceBetweenLines:
+        distance = linesYPosition[i + 1] - linesYPosition[i]
+        if distance < minimumDistanceBetweenLines:
             avg = (linesYPosition[i] + linesYPosition[i + 1]) / 2
             linesYPosition.remove(linesYPosition[i + 1])
             linesYPosition.insert(i, avg)
@@ -44,16 +45,28 @@ def GetLinesYPositions(lines):
             distances.append(abs(linesYPosition[i] - linesYPosition[i + 1]))
 
         dominant = max(set(distances), key=distances.count)
-        return linesYPosition, linesYPosition[1]-linesYPosition[0]
+        if(dominant>maximumDistanceBetweenLines):
+            dominant = maximumDistanceBetweenLines;
+        return linesYPosition, dominant
     return [],[]
 
 
 def Group5Lines(listOfLines, distanceBetweenLines):
+
+
     result =[]
     group = []
     for i in range(len(listOfLines)):
+        if(len(group) == 5):
+            firstDistance = group[1]-group[0]
+            lastDistance = listOfLines[i] -group[4]
+            if(firstDistance > lastDistance):
+                group.remove(group[0])
+            else:
+                result.append(group)
+                group = []
         group.append(listOfLines[i])
-        if(i == len(listOfLines)-1 or abs(listOfLines[i + 1] - listOfLines[i]) > distanceBetweenLines*2):
+        if(i == len(listOfLines)-1 or abs(listOfLines[i + 1] - listOfLines[i]) > distanceBetweenLines*1.3):
             if(len(group) > 2):
                 while(len(group) < 5): #When not all lines was found try to create imitation
                     group.append(group[len(group)-1] + distanceBetweenLines)

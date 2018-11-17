@@ -9,16 +9,18 @@ from skimage import io
 import numpy as np
 
 #PARAMETERS
-lineLength = 250
-minimumDistanceBetweenLines = 5
+lineLength = 200
+minimumDistanceBetweenLines = 10
+maximumDistanceBetweenLines = 50
 font = cv2.FONT_HERSHEY_SIMPLEX  # wybór czcionki - musi być z tych FONT_HERSHEY bo inaczej się sypie np. dla Ariala
 storeImage = True
-useCamera = False
+useCamera = True
 processVideo = False
 imagePath = './Notes/notes05.jpg'
 videoPath = './Notes/video02.mp4'
 drawLines = True
 drawAllLines = False
+reduceNoise = False
 
 # Dodawanie czcionki: https://www.youtube.com/watch?v=U6uIrq2eh_o
 def main():
@@ -32,13 +34,14 @@ def main():
         while True:
             # Capture frame-by-frame
             ret, frame = cap.read()
-
+            if(reduceNoise):
+                frame = cv2.fastNlMeansDenoisingColored(frame,None,4,4,7,10)
             if (storeImage):
                 cv2.imwrite('Czysty.jpg', frame)
             # Our operations on the frame come here
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            processImage(frame, gray, drawLines, drawAllLines)
+            processImage(frame, gray, drawLines, drawAllLines, storeImage)
 
             if (storeImage):
                 cv2.imwrite('ZNutkami.jpg', frame)
