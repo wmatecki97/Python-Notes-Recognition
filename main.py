@@ -10,16 +10,16 @@ import numpy as np
 
 #PARAMETERS
 lineLength = 200
-minimumDistanceBetweenLines =  8
+minimumDistanceBetweenLines = 4
 maximumDistanceBetweenLines = 50
 font = cv2.FONT_HERSHEY_SIMPLEX  # wybór czcionki - musi być z tych FONT_HERSHEY bo inaczej się sypie np. dla Ariala
 storeImage = True
 useCamera = True
-processVideo = False
+processVideo = True
 imagePath = './Notes/notes07.jpg'
-videoPath = './Notes/video02.mp4'
-drawLines = True
-drawAllLines = True
+videoPath = './Notes/video05.mp4'
+drawLines = False
+drawAllLines = False
 reduceNoise = False
 drawContours=False
 

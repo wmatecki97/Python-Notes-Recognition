@@ -27,7 +27,7 @@ def GetCircles(image_rgb, maxNoteHeight, drawContours):
     for n, contour in enumerate(contours):
         area = getArea(contour)
         plt.plot(contour[:, 1], contour[:, 0], linewidth=2)
-        if(area < maxNoteHeight**2 and len(contour[0]) < maxNoteHeight and area > (maxNoteHeight/2)**2):
+        if(area < maxNoteHeight**2*1.5 and len(contour[0]) < maxNoteHeight and area > (maxNoteHeight*0.8)**2):
             circles.append(contour)
 
     centers =[]
