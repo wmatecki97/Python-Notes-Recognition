@@ -10,17 +10,18 @@ import numpy as np
 
 #PARAMETERS
 lineLength = 200
-minimumDistanceBetweenLines = 10
+minimumDistanceBetweenLines =  8
 maximumDistanceBetweenLines = 50
 font = cv2.FONT_HERSHEY_SIMPLEX  # wybór czcionki - musi być z tych FONT_HERSHEY bo inaczej się sypie np. dla Ariala
 storeImage = True
 useCamera = True
 processVideo = False
-imagePath = './Notes/notes05.jpg'
+imagePath = './Notes/notes07.jpg'
 videoPath = './Notes/video02.mp4'
 drawLines = True
-drawAllLines = False
+drawAllLines = True
 reduceNoise = False
+drawContours=False
 
 # Dodawanie czcionki: https://www.youtube.com/watch?v=U6uIrq2eh_o
 def main():
@@ -41,7 +42,7 @@ def main():
             # Our operations on the frame come here
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            processImage(frame, gray, drawLines, drawAllLines, storeImage)
+            processImage(frame, gray, drawLines, drawAllLines, storeImage, drawContours)
 
             if (storeImage):
                 cv2.imwrite('ZNutkami.jpg', frame)
@@ -51,19 +52,19 @@ def main():
         img, gray = GetImage()
         if (storeImage):
                 cv2.imwrite('Czysty.jpg', img)
-        processImage(img, gray, drawLines, drawAllLines, storeImage)
+        processImage(img, gray, drawLines, drawAllLines, storeImage, drawContours)
 
         cv2.waitKey(50000)
 
 
-def processImage(frame, gray, drawLines, drawAllLines, storeImage):
+def processImage(frame, gray, drawLines, drawAllLines, storeImage, drawContours):
     img, areLinesOnImage = GetRotatedImage(frame, gray)
     lines, distanceBetweenLines = GetGrouped5Lines(img, drawAllLines)
 
     if (lines is not None):
         if(drawLines):
             DrawLines(img, lines)
-        notes = GetCircles(img, distanceBetweenLines)
+        notes = GetCircles(img, distanceBetweenLines, drawContours)
         for note in notes:
             tone = GetTone(lines, distanceBetweenLines, note[1])
             cv2.putText(img, tone, (int(note[0] + distanceBetweenLines), int(note[1])), font, 0.5, (255, 0, 0), 1,

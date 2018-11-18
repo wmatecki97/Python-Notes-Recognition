@@ -9,13 +9,14 @@ import numpy as np
 from skimage.color import rgb2gray
 
 
-def GetCircles(image_rgb, maxNoteHeight):
+def GetCircles(image_rgb, maxNoteHeight, drawContours):
     # image_rgb = image[0:220, 0:420]
     image_gray = rgb2gray(image_rgb)
 
     edges = canny(image_gray, sigma=2.0,
-                  low_threshold=0.55, high_threshold=0.8)
+                  low_threshold=0.25, high_threshold=0.2)
 
+    edges = morphology.dilation(edges)
     edges = morphology.dilation(edges)
     edges = morphology.closing(edges)
     #plt.imshow(image_rgb)
@@ -26,7 +27,7 @@ def GetCircles(image_rgb, maxNoteHeight):
     for n, contour in enumerate(contours):
         area = getArea(contour)
         plt.plot(contour[:, 1], contour[:, 0], linewidth=2)
-        if(area < maxNoteHeight**2*4 and area > maxNoteHeight**2*0.001):
+        if(area < maxNoteHeight**2 and len(contour[0]) < maxNoteHeight and area > (maxNoteHeight/2)**2):
             circles.append(contour)
 
     centers =[]
@@ -38,7 +39,13 @@ def GetCircles(image_rgb, maxNoteHeight):
             numPoint = numPoint+1
         centers.append([sumX/numPoint, sumY/numPoint])
 
-    #plt.show()
+    if(drawContours):
+        plt.imshow(image_rgb)
+
+        for n, circle in enumerate(circles):
+            plt.plot(circle[:, 1], circle[:, 0], linewidth=2)
+
+        plt.show()
     return centers
 
 def getArea(contour):

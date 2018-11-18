@@ -6,6 +6,14 @@ import numpy as np
 import math
 
 
+def DrawAllLinesByYPosition(img, linesYPositions):
+
+    for i in range(len(linesYPositions)):
+        cv2.line(img, (0, int(linesYPositions[i])), (len(img[0]), int(linesYPositions[i])), (0,0,255), 2)
+    # All the changes made in the input image are finally
+    # written on a new image houghlines.jpg
+    cv2.imwrite('linesDetected.jpg', img)
+
 def GetGrouped5Lines(img, drawAllLines):
     lines, alfa, areLinesOnImage = GetLines(img)
     if(lines is not None):
@@ -13,6 +21,10 @@ def GetGrouped5Lines(img, drawAllLines):
             DrawAllLines(img, lines)
 
         linesYPositions, distanceBetweenLines = GetLinesYPositions(lines)
+
+        if(drawAllLines):
+            DrawAllLinesByYPosition(img, linesYPositions)
+
         if(len(linesYPositions)>4):
             return Group5Lines(linesYPositions, distanceBetweenLines), distanceBetweenLines
 
@@ -22,21 +34,34 @@ def GetGrouped5Lines(img, drawAllLines):
 # Returns dominant as most common distance between lines in pixels
 def GetLinesYPositions(lines):
     linesYPosition = []
-
+    allYPositions = []
     # Get Y Position Value from line
     for i in range(len(lines)):
-        linesYPosition.append(lines[i][1])
-    linesYPosition.sort()
-    i = 0
+        if(abs(lines[i][1] - lines[i][3]) < 2): #only horizontal lines
+            allYPositions.append(lines[i][1])
+    allYPositions.sort()
 
+    i = 0
+    sameY = []
+    last = len(allYPositions) - 1
     # delete intermediate lines if they are too close
-    while i < len(linesYPosition) - 1:
-        distance = linesYPosition[i + 1] - linesYPosition[i]
-        if distance < minimumDistanceBetweenLines:
-            avg = (linesYPosition[i] + linesYPosition[i + 1]) / 2
-            linesYPosition.remove(linesYPosition[i + 1])
-            linesYPosition.insert(i, avg)
-            linesYPosition.remove(linesYPosition[i + 1])
+    while i <= last:
+        distance = minimumDistanceBetweenLines
+
+        if(i<last):
+            distance = allYPositions[i + 1] - allYPositions[i]
+
+        sameY.append(i)
+
+        if distance >= minimumDistanceBetweenLines:
+            sum = 0
+            for j in range(len(sameY)):
+                sum = sum + allYPositions[sameY[j]]
+            position = sum/len(sameY)
+            linesYPosition.append(position)
+            sameY=[]
+            if(i==last-1):
+                linesYPosition.append(allYPositions[last])
         i = i + 1
     distances = []
 
@@ -91,7 +116,11 @@ def GetRotatedImage(img, gray):
 def DrawAllLines(img, lines):
 
     for i in range(len(lines)):
-        for j in range(len(lines[i])):
+            #for j in range(len(lines[i])):
+            x1 = lines[i][0]
+            y1 = lines[i][1]
+            x2 = lines[i][2]
+            y2 = lines[i][3]
             cv2.line(img, (lines[i][0], lines[i][1]), (lines[i][2], lines[i][3]), [255,0,0], 1)
 
     # All the changes made in the input image are finally
@@ -120,7 +149,7 @@ def GetLines(img):
     # Convert the img to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # Apply edge detection method on the image
-    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    edges = cv2.Canny(gray, 50, 150)
     # This returns an array of r and theta values
     lines = cv2.HoughLines(edges, 1, np.pi / 180, lineLength)
     if(not lines is None):
